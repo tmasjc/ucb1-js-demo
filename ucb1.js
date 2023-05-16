@@ -43,18 +43,43 @@ function getReward(bandit) {
   return Math.random() < bandit.prob ? 1 : 0;
 }
 
+let intervalId;
+let currentRound = 0;
+let ucb1;
+let isPaused = false;
+
 function runSimulation() {
   const rounds = parseInt(document.getElementById('rounds').value);
   const banditProbabilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-  const ucb1 = new UCB1(banditProbabilities);
+  ucb1 = new UCB1(banditProbabilities);
 
-  for (let i = 0; i < rounds; i++) {
-    const chosen_arm = ucb1.selectArm();
-    const reward = getReward(ucb1.bandits[chosen_arm]);
-    ucb1.update(chosen_arm, reward);
+  // Initiate simulation
+  if (intervalId) {
+    clearInterval(intervalId);
+    currentRound = 0;
   }
 
-  displayResults(ucb1.bandits);
+  // Start a new simulation
+  intervalId = setInterval(() => {
+    if (currentRound < rounds && !isPaused) {
+      const chosen_arm = ucb1.selectArm();
+      const reward = getReward(ucb1.bandits[chosen_arm]);
+      ucb1.update(chosen_arm, reward);
+      displayResults(ucb1.bandits);
+      currentRound++;
+    } else {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }, 100); 
+}
+
+function pauseSimulation() {
+  isPaused = true;
+}
+
+function resumeSimulation() {
+  isPaused = false;
 }
 
 function displayResults(bandits) {
@@ -85,3 +110,5 @@ function displayResults(bandits) {
 }
 
 document.getElementById('start').addEventListener('click', runSimulation);
+document.getElementById('pause').addEventListener('click', pauseSimulation);
+document.getElementById('resume').addEventListener('click', resumeSimulation);
