@@ -43,43 +43,40 @@ function getReward(bandit) {
   return Math.random() < bandit.prob ? 1 : 0;
 }
 
-let intervalId;
+let timeoutId;
 let currentRound = 0;
 let ucb1;
-let isPaused = false;
+let rounds;
+
+function initializeSimulation() {
+  const banditProbabilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+  ucb1   = new UCB1(banditProbabilities);
+  rounds = parseInt(document.getElementById('rounds').value);
+  currentRound = 0;
+  runSimulation(); 
+}
 
 function runSimulation() {
-  const rounds = parseInt(document.getElementById('rounds').value);
-  const banditProbabilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-  ucb1 = new UCB1(banditProbabilities);
-
-  // Initiate simulation
-  if (intervalId) {
-    clearInterval(intervalId);
-    currentRound = 0;
+  if (timeoutId) {
+    clearTimeout(timeoutId);
   }
+  simulate();
+}
 
-  // Start a new simulation
-  intervalId = setInterval(() => {
-    if (currentRound < rounds && !isPaused) {
-      const chosen_arm = ucb1.selectArm();
-      const reward = getReward(ucb1.bandits[chosen_arm]);
-      ucb1.update(chosen_arm, reward);
-      displayResults(ucb1.bandits);
-      currentRound++;
-    } else {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-  }, 100); 
+function simulate() {
+  if (currentRound < rounds) {
+    const chosen_arm = ucb1.selectArm();
+    const reward = getReward(ucb1.bandits[chosen_arm]);
+    ucb1.update(chosen_arm, reward);
+    displayResults(ucb1.bandits);
+    currentRound++;
+
+    timeoutId = setTimeout(simulate, 100);
+  }
 }
 
 function pauseSimulation() {
-  isPaused = true;
-}
-
-function resumeSimulation() {
-  isPaused = false;
+  clearTimeout(timeoutId);
 }
 
 function displayResults(bandits) {
@@ -108,7 +105,6 @@ function displayResults(bandits) {
   table += '</table>';
   resultsDiv.innerHTML = table;
 }
-
-document.getElementById('start').addEventListener('click', runSimulation);
+document.getElementById('init').addEventListener('click', initializeSimulation);
 document.getElementById('pause').addEventListener('click', pauseSimulation);
-document.getElementById('resume').addEventListener('click', resumeSimulation);
+document.getElementById('resume').addEventListener('click', runSimulation);

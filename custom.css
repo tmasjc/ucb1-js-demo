@@ -21,3 +21,17 @@ th, td {
 th {
   background-color: #f2f2f2;
 }
+
+#init {
+  background-color: greenyellow;
+}
+
+#pause {
+  background-color: blanchedalmond;
+}
+
+#resume {
+  background-color: lightcyan;
+}
+
+
