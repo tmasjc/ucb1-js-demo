@@ -7,7 +7,7 @@ class Bandit {
 
   update(new_value) {
     this.count += 1;
-    this.value += (new_value - this.value) / this.count;
+    this.value += (new_value - this.value) / this.count; // scaling factor
   }
 }
 
@@ -48,8 +48,15 @@ let currentRound = 0;
 let ucb1;
 let rounds;
 
+const arrayRange = (start, stop, step) =>
+  Array.from(
+    { length: (stop - start) / step + 1 },
+    (value, index) => start + index * step
+  );
+
 function initializeSimulation() {
-  const banditProbabilities = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+  const banditProbabilities =
+    arrayRange(0.1, 0.5, 0.05).map(v => Math.round((v + Number.EPSILON) * 100) / 100);
   ucb1   = new UCB1(banditProbabilities);
   rounds = parseInt(document.getElementById('rounds').value);
   currentRound = 0;
